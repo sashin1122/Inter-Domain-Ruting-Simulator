@@ -1,0 +1,1249 @@
+<html>
+
+    <head> 
+        <script src="build/sigma.min.js"></script>
+        <script src="build/plugins/sigma.parsers.json.min.js"></script>
+        <script src="build/plugins/sigma.plugins.animate.min.js"></script>
+        <script src="build/plugins/sigma.plugins.animate.js"></script> 
+        <script src="build/plugins/sigma.plugins.dragNodes.min.js"></script>
+        <script src="build/plugins/sigma.layout.forceAtlas2.min.js"></script>
+        <script src ="build/plugins/sigma.layout.noverlap.min.js"></script>
+        <script src ="build/plugins/sigma.exporters.svg.min.js"></script>
+        <script src ="build/plugins/sigma.renderers.snapshot.min.js"></script>
+
+        <meta charset="utf-8" />
+        <title>Network Simulation Prototype</title> 
+
+        <link rel="stylesheet" type="text/css" href="style.css">
+    </head>
+
+    <body>
+        <!--Sidebar-->
+        <div class="sidebar">
+            <h1>Network Simulator</h1>
+
+            <div>
+                <!--Instructions-->
+                <button class="collapsible">Instructions:</button>
+                <div class="content">
+                    <p>1. Select input .csv file</p>
+                    <p>2. Edit the network</p>
+                    <p>3. Configure a routing simulation</p>
+                    <p>4. View and download perfromance data</p>
+                    <p>5. Additional information</p>
+                </div>
+            </div>
+
+            <div style="text-align: center;">s
+                <!--Select csv-->
+                <h3>Select an input csv file</h3>
+                <div class="box">
+                    <br>
+                    <input type="file" onchange='openFile(event)'>
+                    <br><br>
+
+                    <div style="text-align: center;">
+                        <form action="/action_page.php">
+                            <button id="layout" type="button">Animate</button>
+                            <br><br>
+                            <button type="button" onclick="reloadTP()">
+                                Reload Network From Previous Session
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+
+
+            <div>
+                <!--Edit network-->
+                <h3>Edit the network</h3>
+                <button class="collapsible">Add a node</button>
+                <div class="content">
+                    <form action="/action_page.php">
+                        <br>
+                        <!--##########################################################################################-->
+                        Enter new node ID:<br>
+                        <input type="text" name="newNode" value="" id="newNode">  
+                        <br><br>
+                        Enter Country Code <br>
+                        <input type = "text" name = "nodeCountry" value = "" id="nodeCountry">
+                        <br><br>
+                        <!--##########################################################################################-->
+                        Select node tier:<br>
+                        <select id = "selectTier"> <!--Change this to options of the different node tiers-->
+                            <option>Node Tier</option>
+                        </select>
+                        <br><br>
+
+                        Select existing node to connect to:<br>
+                        <select id = "existingNode"> <!--Change this to options of the different available nodes-->
+                            <option>Node</option>
+                        </select>
+                        <br><br>
+
+                        <!--##########################################################################################-->
+                        Enter edge cost:<br>
+                        <select id="edgeCost">
+                            <option>Edge Cost</option>
+                        </select> 
+                        <br><br>
+                        Enter Delay on edge:<br>
+                        <select id = "edgeDelay">
+                            <option>Delay on Edge</option>
+                        </select>
+                        <br><br>
+                        <button type="button" onclick="addNodeFunction()">
+                            ADD
+                        </button>
+                        <!--##########################################################################################-->
+                    </form>
+                </div>
+                <button class="collapsible">Delete a node</button>
+                <div class="content">
+                    <form action="/action_page.php">
+                        <br>
+                        Select a node to delete:<br>
+                        <select id = "nodeToDelete"> <!--Change this to a dropdown of all the available nodes-->
+                            <option>Delete Node</option>
+                        </select>
+                        <br><br>
+                        <!--##########################################################################################-->
+                        <button type="button" onclick="deleteNodeFunction()">
+                            DELETE
+                        </button>
+                        <!--##########################################################################################-->
+                    </form>
+                </div>
+            </div>
+
+            <div>
+                <!--Configure routing simulation-->
+                <h3>Configure a routing simulation</h3>
+                <form class="box" action="/action_page.php">
+                    Select start node:<br>
+                    <select id="selectStart">
+                        <option>Start Node</option>    
+                    </select>
+                    <br><br>
+
+                    Select end node:<br>
+                    <select id = "selectEnd">
+                        <option>End Node</option>
+                    </select>
+                    <br><br>
+
+                    Select a routing algorithm:<br>
+                    <select id = "selectRoutingAlgorithm"> 
+                        <option>Routing Algorithm</option>
+                    </select>
+                    <br><br>
+
+                    
+                    Select Packet Size (Mb)<br>
+                    <select id = "packetSize">
+                        <option>Packet Size</option>
+                        <br><br>
+                    </select>
+                    <br><br>
+                    <button type="button" onclick="submitFunction()">
+                        Submit
+                    </button>
+                    <br><br>
+                    <button type="button" onclick="lightbutton()">
+                        Light Up Path
+                    </button>
+                    <br><br>
+                </form>
+            </div>
+            <div style="text-align: center;">
+                <!--Performance data-->
+                <h3>Performance data</h3>
+                <div class="box">
+                    <p style = "color: white" id="demo"></p>
+                    <p style = "color: white" id="demo1"></p>
+                    <p style = "color: white" id="demo2"></p>
+                    <p style = "color: white" id="demo3"></p>
+                    <p style = "color: white" id="demo4"></p>
+                    <p style = "color: white" id="demo5"></p>
+                    <p style = "color: white" id="demo6"></p>
+                    <br>
+                    <button class="button" type="button" onclick="saveFunction()">
+                        Download Performance Data
+                    </button>
+                    <br><br>
+                    <button class="button" type="button" onclick="saveTPFunction()">
+                        Download Network Topology Data
+                    </button>
+                    <br><br>
+                </div>
+            </div>
+            <div>
+                <!--Additional Information-->
+                <button class="collapsible">Additional Information:</button>
+                <div class="content">
+                    <p> Click the animate button to change the view or pause and interact with the network.</p>                
+                </div>
+            </div>
+            <script>
+                var nodeIds = [];
+                var gpdata = "";
+                var algorithmChoice = ["Dijikstra", "Bellman-Ford"];
+                var nodeTiers = ["T1", "T2", "T3", "IXP"];
+                var selectStart = document.getElementById("selectStart");
+                var selectEnd = document.getElementById("selectEnd");
+                var selectTier = document.getElementById("selectTier");
+                var nodeToDelete = document.getElementById("nodeToDelete");
+                var frequency = document.getElementById("frequency");
+                var delay = document.getElementById("delay");
+                var packetSize = document.getElementById("packetSize");
+                let csvContent = "data:text/csv;charset=utf-8,";
+                var performancecount = 0;
+                var nodecounter = 0;
+                var edgecounter = 0;
+                // Here the value is stored in new variable x  
+                // DO CHECK TO SEE GRAPH IS BUILT BEFORE ACCEPTING START AND END NODE
+
+                // this function iterates through the graph nodes array to remove the selected node from the user, it then runs through the array of edges to remove the edges associated with that node
+                // in order to prevent there from being edges that are not connected to any nodes. It is responsible for removing the nodes from the database as well.
+                function deleteNodeFunction() {
+                    
+
+                    // Logic block for deleting nodes from database
+//#######################################################################################################
+                    var deleteNode = document.getElementById("nodeToDelete").value;
+                    var deletedNodeIndex = graph.nodes.indexOf(deleteNode);
+                    if (localStorage.getItem("%n" + deleteNode) != null) {
+                        localStorage.removeItem("%n" + deleteNode);
+                    }
+                    // code to delete edges from database
+                    var datafetch = Object.entries(localStorage);
+                    var splitexportdata = [];
+                    for (var i = 0; i < datafetch.length; i++) {
+                        splitexportdata = splitexportdata.concat(datafetch[i]);
+                    }
+                    for (i = 0; i < splitexportdata.length; i++) {
+                        if (splitexportdata[i].charAt(0) === "%" && splitexportdata[i].charAt(1) === "e" && splitexportdata[i + 1]) {
+                            if (splitexportdata[i] && splitexportdata[i + 1]) {
+                                var edgedata = splitexportdata[i + 1].split(",");
+                                if (edgedata[0].trim() === deleteNode || edgedata[1].trim() === deleteNode) {
+                                    var key = splitexportdata[i].trim();
+                                    localStorage.removeItem(key);
+                                }
+                            }
+                        }
+                    }
+//########################################################################################################
+                    for (var e = 0; e < graph.edges.length; e++) {
+                        var edgeToDelete = graph.edges[e];
+                        if ((edgeToDelete["source"] === deleteNode) || (edgeToDelete["target"] === deleteNode)) {
+                            graph.edges.splice(e, 1);
+                            e--;
+                        }
+                    }
+                    for (var ed = 0; ed < graph.edges.length; ed++) {
+                        var edg = graph.edges[ed];
+                        if ((edg["source"] === deleteNode) || (edg["target"] === deleteNode)) {
+                        }
+                    }
+                    s.graph.clear();
+                    s.graph.read(graph);
+                    s.refresh();
+                }
+
+//function for light path button
+
+                function lightbutton() {
+                    if(gpdata!=""){
+                     var pathdata = gpdata;
+                     var lightpathIDs = pathdata.split("-->");
+                    runpath(lightpathIDs);   
+                    }
+                    
+                    
+                }
+
+                // this function adds the nodes to the graph and to the database. 
+                // The function takes in the node id, cost of edge and tier from the user. 
+                // if it is a tier 1 node that the user enters the function loops through the dictionary values and interconnects all the tiers 1's together to abide to the networking rule that all tier 1's 
+                // must be connected directly to each other
+                // the function also automatically determines the type of edge (P, TP, C link etc) and adds it accordingly to the graph and the database.
+                function addNodeFunction() {
+                    
+                    
+                    var sourceID = document.getElementById("newNode").value;
+                    
+                    var destiantionID = document.getElementById("existingNode").value;
+                    var cost = document.getElementById("edgeCost").value;
+                    var nodeTier = document.getElementById("selectTier").value;
+                    var edgeCost = document.getElementById("edgeCost").value;
+                    var Etype = "";
+
+
+                    
+                    
+                    var nodecountry = document.getElementById("nodeCountry").value;
+                    var linkdelay = document.getElementById("edgeDelay").value;
+                    // data must be added to Node table and edge table in database here
+                    // Source,Destination,Type,Cost,Delay
+
+
+                    //logic for adding node to data base with respective edge links
+                    //#####################################################################################################
+                    if (typeof (Storage) !== "undefined") {
+                        nodecounter++;
+                        edgecounter++;
+                        var key1 = "%n" + sourceID;
+                        var key2 = "%edge" + edgecounter;
+                        var data1 = nodeTier + "," + nodecountry;
+                        localStorage.setItem(key1, data1);
+                        var foundtierdata = "";
+                        if (localStorage.getItem("%n" + destiantionID) != null) {
+                            foundtierdata = localStorage.getItem("%n" + destiantionID).trim();
+                        }
+                        var splitdata = foundtierdata.split(",");
+
+                        // PLEASE NOTE THESE EDGE ADDS ONLY ALLOW FOR VALID NODE PAIRS I.E A T1 NODE CAN NEVER BE CONNECTED TO A T3 NODE
+                        if (nodeTier === "T1" && splitdata[0].trim() === "T1") {
+                            var data2 = sourceID + "," + destiantionID + "," + "P" + "," + cost + "," + delay;
+                            localStorage.setItem(key2, data2);
+                            edgecounter++;
+                            var extrakey = "%edge" + edgecounter;
+                            var extradata = destiantionID + "," + sourceID + "," + "P" + "," + cost + "," + delay;
+                            localStorage.setItem(extrakey, extradata);
+                            Etype = "P";
+                        }
+                        if (nodeTier === "T1" && splitdata[0].trim() === "T2") {
+                            var data2 = sourceID + "," + destiantionID + "," + "PC" + "," + cost + "," + delay;
+                            localStorage.setItem(key2, data2);
+                            edgecounter++;
+                            var extrakey = "%edge" + edgecounter;
+                            var extradata = destiantionID + "," + sourceID + "," + "CP" + "," + cost + "," + delay;
+                            localStorage.setItem(extrakey, extradata);
+                            Etype = "PC";
+                        }
+                        if (nodeTier === "T2" && splitdata[0].trim() === "T1") {
+                            var data2 = sourceID + "," + destiantionID + "," + "CP" + "," + cost + "," + delay;
+                            localStorage.setItem(key2, data2);
+                            edgecounter++;
+                            var extrakey = "%edge" + edgecounter;
+                            var extradata = destiantionID + "," + sourceID + "," + "PC" + "," + cost + "," + delay;
+                            localStorage.setItem(extrakey, extradata);
+                            Etype = "CP";
+                        }
+                        if (nodeTier === "T2" && splitdata[0].trim() === "T3") {
+                            var data2 = sourceID + "," + destiantionID + "," + "PC" + "," + cost + "," + delay;
+                            localStorage.setItem(key2, data2);
+                            edgecounter++;
+                            var extrakey = "%edge" + edgecounter;
+                            var extradata = destiantionID + "," + sourceID + "," + "CP" + "," + cost + "," + delay;
+                            localStorage.setItem(extrakey, extradata);
+                            Etype = "PC";
+                        }
+                        if (nodeTier === "T3" && splitdata[0].trim() === "T2") {
+                            var data2 = sourceID + "," + destiantionID + "," + "CP" + "," + cost + "," + delay;
+                            localStorage.setItem(key2, data2);
+                            edgecounter++;
+                            var extrakey = "%edge" + edgecounter;
+                            var extradata = destiantionID + "," + sourceID + "," + "PC" + "," + cost + "," + delay;
+                            localStorage.setItem(extrakey, extradata);
+                            Etype = "CP";
+                        }
+                        if (nodeTier === "T3" && splitdata[0].trim() === "IX") {
+                            var data2 = sourceID + "," + destiantionID + "," + "IX" + "," + cost + "," + delay;
+                            localStorage.setItem(key2, data2);
+                            edgecounter++;
+                            var extrakey = "%edge" + edgecounter;
+                            var extradata = destiantionID + "," + sourceID + "," + "IX" + "," + cost + "," + delay;
+                            localStorage.setItem(extrakey, extradata);
+                            Etype = "IX";
+                        }
+                        if (nodeTier === "IX" && splitdata[0].trim() === "T3") {
+                            var data2 = sourceID + "," + destiantionID + "," + "IX" + "," + cost + "," + delay;
+                            localStorage.setItem(key2, data2);
+                            edgecounter++;
+                            var extrakey = "%edge" + edgecounter;
+                            var extradata = destiantionID + "," + sourceID + "," + "IX" + "," + cost + "," + delay;
+                            localStorage.setItem(extrakey, extradata);
+                            Etype = "IX";
+                        }
+                    } else {
+                        document.getElementById("result").innerHTML = "Sorry, your browser does not support Web Storage...";
+                    }
+
+
+
+                    //logic block for adding node to graph objects
+                    if (nodeTier === "T1") {
+                        graph.nodes.push({id: sourceID, size: 9, color: '#70c405', label: sourceID, x: Math.random(), y: Math.random()});
+                        for (var tierOnes = 0; tierOnes < graph.nodes.length; tierOnes++) {
+                            var tierOneNode = graph.nodes[tierOnes];
+                            if (tierOneNode["color"] === "#70c405") {
+                                graph.edges.push({id: sourceID + "--" + tierOneNode["id"], source: sourceID, target: tierOneNode["id"], label: 1, color: "#282c34", size: 0.5});
+                                graph.edges.push({id: sourceID + " " + tierOneNode["id"], source: tierOneNode["id"], target: sourceID, label: 1, color: "#282c34", size: 0.5});
+                                g.addEdge(sourceID, tierOneNode["id"], parseInt(cost));
+                                g.addEdge(tierOneNode["id"], sourceID, parseInt(cost));
+                            }
+                        }
+                        nodeIds.push(sourceID);
+                        selectStart.add(new Option(sourceID));
+                        selectEnd.add(new Option(sourceID));
+                    }
+                    if (nodeTier === "T2") {
+                        graph.nodes.push({id: sourceID, size: 6, color: '#fcd134', label: sourceID, x: Math.random(), y: Math.random()});
+                        g.addEdge(sourceID, destiantionID, cost + 1);
+                        nodeIds.push(sourceID);
+                    }
+                    if (nodeTier === "T3") {
+                        graph.nodes.push({id: sourceID, size: 3, color: '#ff1744', label: sourceID, x: Math.random(), y: Math.random()});
+                        g.addEdge(sourceID, destiantionID, cost + 1);
+                        nodeIds.push(sourceID);
+                    }
+                    if (nodeTier === "IX") {
+                        graph.nodes.push({id: sourceID, size: 3, color: '#008cc2', label: sourceID, x: Math.random(), y: Math.random()});
+                        g.addEdge(sourceID, destiantionID, cost + 1);
+                        nodeIds.push(sourceID);
+                    }
+                    if (Etype === "P") {
+                        graph.edges.push({id: sourceID, source: sourceID, target: destiantionID, label: cost, color: '#282c34', size: 0.5});
+                        g.addEdge(sourceID, destiantionID, cost + 1);
+                        nodeIds.push(sourceID);
+                    }
+                    if (Etype === "PC") {
+                        graph.edges.push({id: sourceID, source: sourceID, target: destiantionID, label: cost, color: '#ff0000', size: 0.5});
+                        g.addEdge(sourceID, destiantionID, cost + 1);
+                        nodeIds.push(sourceID);
+                    }
+                    if (Etype === "CP") {
+                        graph.edges.push({id: sourceID, source: sourceID, target: destiantionID, label: cost, color: '#46ff33', size: 0.5});
+                        g.addEdge(sourceID, destiantionID, cost + 1);
+                        nodeIds.push(sourceID);
+                    }
+                    if (Etype === "IX") {
+                        graph.edges.push({id: sourceID, source: sourceID, target: destiantionID, label: cost, color: '#33fcff', size: 0.5});
+                        g.addEdge(sourceID, destiantionID, cost + 1);
+                        nodeIds.push(sourceID);
+                    }
+                    s.graph.clear();
+                    s.graph.read(graph);
+                    s.refresh();
+                }
+
+                // when clicking the submit function, it reads the starts and end value to be passed into the routing algorithms
+                // it centres the routing algorithm at the start value and then calculates the distance to all surrrounding nodes
+                // it then gets the distance to the end node that the user selected and returns the shortest path with the lowest cost 
+                // it displays the data to the user under performance data
+                function submitFunction() {
+                    s.stopForceAtlas2();
+                    if (graph.nodes[0].id) {
+                        var x = document.getElementById("selectStart").value;
+                        var y = document.getElementById("selectEnd").value;
+                        var a = document.getElementById("selectRoutingAlgorithm").value;
+                        var isnumx = "";
+                        var isnumy = "";
+                        if (!isnumx) {
+                            if (!isnumy) {
+                                if (a == "Dijikstra") {
+                                    g.dijikstraAlgorithm(x);
+                                    var endNode = g.getVertex(y);
+                                    var distance = endNode.getDistance();
+                                    document.getElementById("demo").innerHTML = "The cost is: " + distance;
+                                    var finalPath = g.printOutPath(endNode);
+                                    var printPath = finalPath.slice(3, finalPath.length);
+                                    document.getElementById("demo2").innerHTML = "The lowest cost path is: " + printPath;
+                                }
+                                if (a == "Bellman-Ford") {
+                                    g.bellmanFord(x);
+                                    var endNode = g.getVertex(y);
+                                    var distance = endNode.getDistance();
+                                    document.getElementById("demo").innerHTML = "The cost is: " + distance;
+                                    var finalPath = g.printOutPath(endNode);
+                                    var printPath = finalPath.slice(3, finalPath.length);
+                                    document.getElementById("demo2").innerHTML = "The lowest cost path is: " + printPath;
+                                }
+                                if (a == "Routing Algorithm") {
+                                    document.getElementById("demo2").innerHTML = "No algorithm selected";
+                                }
+
+//Logic block for adding performance data to database
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                                var contentstore = 0;
+                               
+                                performancecount ++;
+                               
+                               gpdata = printPath;
+                                var pkey = "pdata"+performancecount;
+                                var pdata = printPath.split("-->");
+                                var pvalue = ""
+                                for(i=0;i<pdata.length;i++){
+                                    pvalue += pdata[i] + ",";
+                                }
+                                //console.log(pvalue.substring(0, pvalue.length - 1));
+                                pvalue=pvalue.substring(0, pvalue.length - 1);
+                                localStorage.setItem(pkey,pvalue);
+                               
+                               
+                               
+                               
+                               
+                                var datafetch = Object.entries(localStorage);
+                                var splitexportdata = [];
+                                for (var i = 0; i < datafetch.length; i++) {
+                                    splitexportdata = splitexportdata.concat(datafetch[i]);
+                                }
+                                for (var i = 0; i < splitexportdata.length; i++) {
+                                    if (splitexportdata[i].charAt(0) === "%" && splitexportdata[i].charAt(1) === "e" && splitexportdata[i + 1]) {
+                                        if (splitexportdata[i] && splitexportdata[i + 1]) {
+                                            var edgedata = splitexportdata[i + 1].split(",");
+                                            for(var x = 0; x < pdata.length-1;x++){
+                                            if (edgedata[0].trim() === pdata[x] && edgedata[1].trim() === pdata[x+1]) {
+                                                       
+                                                    contentstore = contentstore + parseInt(edgedata[4]);    
+                                                        console.log(contentstore);
+                                                       
+                                                       
+                                                       
+                                                       
+                                                       
+                                           
+                                            }
+                                            }
+                                        }
+                                    }
+                                }
+                               
+                               
+                               
+                               
+                               
+                               
+                               
+                               
+                               
+                                var rkey = "rdata" + performancecount;
+                                var packetsize = document.getElementById("packetSize").value;
+                                var totaltime = contentstore;
+                                console.log(totaltime);
+                                console.log(packetsize);
+                                var bandwidtch = packetsize/totaltime;
+                                var throughput = 100;
+                           
+                                var errorrate = 0;
+                                var totalcost = distance;
+                               
+                                var rvalue = bandwidtch + "," + throughput + "," + totaltime + "," + errorrate + "," + totalcost;
+                                localStorage.setItem(rkey,rvalue);
+                               
+                               
+  ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////                             
+                               
+                               
+                               
+                               
+                               
+                               
+                              // populates csv variable with performance data for download. 
+                                csvContent += "Performance Data On Transmition "+ performancecount + "\r\n";
+                                csvContent += "Bandwidth,"+ bandwidtch + "Mbps"  + "\r\n";
+                                csvContent += "Throughput,"+ throughput +"%" + "\r\n";
+                                csvContent += "Error,"+ errorrate +"%" + "\r\n";
+                                csvContent += "Total Time,"+ totaltime +"s"  + "\r\n";
+                                csvContent += "Total Cost,"+ totalcost + " units"  + "\r\n";
+                                csvContent += "The lowest cost path is," + pvalue + "\r\n";
+
+
+                                //display performance data to form on screan
+                                document.getElementById("demo").innerHTML = "Performance Data On Transmition "+ performancecount;
+                                document.getElementById("demo1").innerHTML = "Bandwidth: "+ bandwidtch + "Mbps";
+                                document.getElementById("demo2").innerHTML = "Throughput: "+ throughput +"%";
+                                document.getElementById("demo3").innerHTML = "Error: "+ errorrate +"%";
+                                document.getElementById("demo4").innerHTML = "Total Time: "+ totaltime +"s" ;
+                                document.getElementById("demo5").innerHTML = "Total Cost: "+ totalcost + " units";
+                                document.getElementById("demo6").innerHTML = "The lowest cost path is: " + printPath;
+
+
+
+
+
+
+
+                                
+
+                            } else {
+                                document.getElementById("demo").innerHTML = "Start Node Valid";
+                                document.getElementById("demo2").innerHTML = "End Node Invalid!";
+                            }
+                        } else {
+
+                            document.getElementById("demo").innerHTML = "Start Node Invalid!";
+                        }
+                    } else {
+                        document.getElementById("demo").innerHTML = "ERROR!!!";
+                        document.getElementById("demo2").innerHTML = "Please select an input .csv file to build simulation. ";
+                    }
+         
+                }
+
+                //function to download performance data
+                function saveFunction() {
+                    var encodedUri = encodeURI(csvContent);
+                    var link = document.createElement("a");
+                    link.setAttribute("href", encodedUri);
+                    link.setAttribute("download", "my_data.csv");
+                    document.body.appendChild(link); // Required for FF
+                    link.click(); // This will download the data file named "my_data.csv"    
+                }
+
+
+                //function to download topology
+                function saveTPFunction() {
+                    //load data from database into  csvContent2 here if needed
+                    var csvContent2 = "data:text/csv;charset=utf-8,";
+                    var datafetch = Object.entries(localStorage);
+                    var splitexportdata = [];
+                    for (var i = 0; i < datafetch.length; i++) {
+                        splitexportdata = splitexportdata.concat(datafetch[i]);
+                    }
+                    csvContent2 += "NodeID,NodeType,CountryCode" + "\r\n";
+                    for (i = 0; i < splitexportdata.length; i++) {
+                        if (splitexportdata[i].charAt(0) === "%" && splitexportdata[i].charAt(1) === "n") {
+                            if (splitexportdata[i] && splitexportdata[i + 1]) {
+                                var splitagain = splitexportdata[i].substr(2);
+                                csvContent2 += splitagain.trim() + "," + splitexportdata[i + 1].trim() + "\r\n";
+                            }
+                        }
+                    }
+                    csvContent2 += "Source,Destination,Type,Cost,Delay" + "\r\n";
+                    for (i = 0; i < splitexportdata.length; i++) {
+                        if (splitexportdata[i].charAt(0) === "%" && splitexportdata[i].charAt(1) === "e") {
+                            if (splitexportdata[i] && splitexportdata[i + 1]) {
+                                csvContent2 += splitexportdata[i + 1].trim() + "\r\n";
+                            }
+                        }
+                    }
+                    var encodedUri = encodeURI(csvContent2);
+                    var link = document.createElement("a");
+                    link.setAttribute("href", encodedUri);
+                    link.setAttribute("download", "my_topology_data.csv");
+                    document.body.appendChild(link); // Required for FF
+                    link.click(); // This will download the data file named "my_topology_data.csv"
+                }
+                
+                // reloads the saved topology from the database back into sigma in the event the web page crashes
+                function reloadTP() {
+                    if (window.localStorage.length != 0) {
+                        var radius = 10;
+                        var datafetch = Object.entries(localStorage);
+                        graph.nodes = [];
+                        graph.edges = [];
+                        var splitexportdata = [];
+                        for (var i = 0; i < datafetch.length; i++) {
+                            splitexportdata = splitexportdata.concat(datafetch[i]);
+                        }
+                        for (i = 0; i < splitexportdata.length; i++) {
+                            if (splitexportdata[i].charAt(0) === "%" && splitexportdata[i].charAt(1) === "n") {
+                                if (splitexportdata[i] && splitexportdata[i + 1]) {
+                                    var splitagain = splitexportdata[i].substr(2);
+                                    //  var test = spliagain[1].trim() + "," + splitexportdata[i+1].trim() ;
+                                    var splitagain2 = splitexportdata[i + 1].split(",");
+                                    var tag = splitagain.trim() + "," + splitexportdata[i + 1].trim();
+                                    if (splitagain2[0] === "T1") {
+                                        var a = Math.random() * 2 * 3.142;
+                                        // adds to the graph here
+                                        graph.nodes.push({id: splitagain.trim(), size: 9, color: '#70c405', label: tag, x: Math.cos(a) * radius, y: Math.sin(a) * radius});
+                                        g.addEdgeSingle(splitagain.trim());
+                                        nodeIds.push(splitagain.trim());
+                                    } else if (splitagain2[0] === "T2") {
+                                        var a = Math.random() * 2 * 3.142;
+                                        // adds to the graph here
+                                        graph.nodes.push({id: splitagain.trim(), size: 6, color: '#fcd134', label: tag, x: Math.cos(a) * radius, y: Math.sin(a) * radius});
+                                        g.addEdgeSingle(splitagain.trim())
+                                        nodeIds.push(splitagain.trim());
+                                    } else if (splitagain2[0] === "T3") {
+                                        var a = Math.random() * 2 * 3.142;
+                                        // adds to the graph here
+                                        graph.nodes.push({id: splitagain.trim(), size: 3, color: '#ff1744', label: tag, x: Math.cos(a) * radius, y: Math.sin(a) * radius});
+                                        g.addEdgeSingle(splitagain.trim());
+                                        nodeIds.push(splitagain.trim());
+                                    } else if (splitagain2[0] === "IX") {
+                                        var a = Math.random() * 2 * 3.142;
+                                        // adds to the graph here
+                                        graph.nodes.push({id: splitagain.trim(), size: 3, color: '#008cc2', label: tag, x: Math.cos(a) * radius, y: Math.sin(a) * radius});
+                                        g.addEdgeSingle(splitagain.trim());
+                                        nodeIds.push(splitagain.trim());
+                                    }
+                                }
+                            }
+                        }
+                        for (i = 0; i < splitexportdata.length; i++) {
+                            if (splitexportdata[i].charAt(0) === "%" && splitexportdata[i].charAt(1) === "e") {
+                                if (splitexportdata[i] && splitexportdata[i + 1]) {
+                                    var edgenum = "E" + splitexportdata[i].substr(2);
+                                    var edata = splitexportdata[i + 1].split(",");
+                                    if (edata[2] === "P") {
+                                        graph.edges.push({id: edgenum, source: edata[0].trim(), target: edata[1].trim(), label: edata[3].trim(), color: '#282c34', size: 0.5})
+                                        var cost = parseInt(edata[3]);
+                                        g.addEdge(edata[0].trim(), edata[1].trim(), cost);
+                                    } else if (edata[2] === "PC") {
+                                        graph.edges.push({id: edgenum, source: edata[0].trim(), target: edata[1].trim(), label: edata[3].trim(), color: '##46ff33', size: 0.5})
+                                        var cost = parseInt(edata[3]);
+                                        g.addEdge(edata[0].trim(), edata[1].trim(), cost);
+                                    } else if (edata[2] === "CP") {
+                                        graph.edges.push({id: edgenum, source: edata[0].trim(), target: edata[1].trim(), label: edata[3].trim(), color: '#46ff33', size: 0.5})
+                                        var cost = parseInt(edata[3]);
+                                        g.addEdge(edata[0].trim(), edata[1].trim(), cost);
+                                    } else if (edata[2] == "IX") {
+                                        graph.edges.push({id: edgenum, source: edata[0].trim(), target: edata[1].trim(), label: edata[3].trim(), color: '#33fcff', size: 0.5})
+                                        var cost = parseInt(edata[3]);
+                                        g.addEdge(edata[0].trim(), edata[1].trim(), cost);
+
+                                    }
+                                }
+
+                            }
+                        }
+                        for (var i = 0; i < nodeIds.length; i++) {
+                            selectStart.add(new Option(nodeIds[i]));
+                            selectEnd.add(new Option(nodeIds[i]));
+                            existingNode.add(new Option(nodeIds[i]));
+                            nodeToDelete.add(new Option(nodeIds[i]));
+                        }
+                        for (tier in nodeTiers) {
+                            selectTier.add(new Option(nodeTiers[tier]));
+                        }
+
+                        for (var delayValue = 0; delayValue <= 100; delayValue++) {
+                            delay.add(new Option(delayValue));
+                        }
+
+                        for (var frequencyValue = 1; frequencyValue <= 100; frequencyValue++) {
+                            frequency.add(new Option(frequencyValue));
+                        }
+    
+                        for (var packets = 1; packets<=1000;packets++){
+                            packetSize.add(new Option(packets));
+                        }
+                        for (choice in algorithmChoice) {
+                        selectRoutingAlgorithm.add(new Option(algorithmChoice[choice]));
+                        }
+                        for (var cost = 0; cost<=10;cost++){
+                            edgeCost.add(new Option(cost));
+                            edgeDelay.add(new Option(cost));
+                        }
+                        
+                        if (a == "Dijikstra") {
+                                    g.dijikstraAlgorithm(x);
+                                    var endNode = g.getVertex(y);
+                                    var distance = endNode.getDistance();
+                                    document.getElementById("demo").innerHTML = "The cost is: " + distance;
+                                    var finalPath = g.printOutPath(endNode);
+                                    var printPath = finalPath.slice(3, finalPath.length);
+                                    document.getElementById("demo2").innerHTML = "The lowest cost path is: " + printPath;
+                                }
+                                if (a == "Bellman-Ford") {
+                                    g.bellmanFord(x);
+                                    var endNode = g.getVertex(y);
+                                    var distance = endNode.getDistance();
+                                    document.getElementById("demo").innerHTML = "The cost is: " + distance;
+                                    var finalPath = g.printOutPath(endNode);
+                                    var printPath = finalPath.slice(3, finalPath.length);
+                                    document.getElementById("demo2").innerHTML = "The lowest cost path is: " + printPath;
+                                }
+                                if (a == "Routing Algorithm") {
+                                    document.getElementById("demo2").innerHTML = "No algorithm selected";
+                                }
+                        s.graph.clear();
+                        s.graph.read(graph);
+                        // signma draws the graph
+                        s.refresh();
+                        var force = false;
+                        document.getElementById('layout').onclick = function () {
+                        if (!force)
+                            s.startForceAtlas2({slowDown: 10});
+                        else
+                            s.stopForceAtlas2();
+                        force = !force;
+                        };
+                        } else {
+                            console.log("local storage empty!");
+                        }
+                }
+
+                function wait(ms) {
+                    var start = new Date().getTime();
+                    var end = start;
+                    while (end < start + ms) {
+                        end = new Date().getTime();
+                    }
+                }
+
+                //function to light up shortest path in sigma
+
+                function runpath(pathids) {
+                    
+                    for (var x = 0; x < pathids.length; x++) {
+                        if (pathids[x + 1] != null) {
+                            for (var i in graph.edges) {
+                                if (graph.edges[i].source === pathids[x] && graph.edges[i].target === pathids[x + 1]) {
+                                    colorsave = graph.edges[i].color;
+                                    graph.edges[i].color = "#f93004";
+                                    break; //Stop this loop, we found it!
+                                }
+                            }
+                            for (var i in graph.edges) {
+                                if (graph.edges[i].source === pathids[x + 1] && graph.edges[i].target === pathids[x]) {
+                                    graph.edges[i].color = "#f93004";
+                                    break; //Stop this loop, we found it!
+                                }
+                            }
+                        }
+                    }
+                    s.graph.clear();
+                    s.graph.read(graph);
+                    //  signma draws the graph
+                    //s.startForceAtlas2();
+                    s.refresh();
+                    stateChange();
+                    function stateChange() {
+                        setTimeout(function () {
+                            for (var x = 0; x < pathids.length; x++) {
+                                if (pathids[x + 1] != null) {
+                                    for (var i in graph.edges) {
+                                        if (graph.edges[i].source === pathids[x] && graph.edges[i].target === pathids[x + 1]) {
+                                            graph.edges[i].color = colorsave;
+                                            break; //Stop this loop, we found it!
+                                        }
+                                    }
+                                    for (var i in graph.edges) {
+                                        if (graph.edges[i].source === pathids[x + 1] && graph.edges[i].target === pathids[x]) {
+                                            graph.edges[i].color = colorsave;
+                                            break; //Stop this loop, we found it!
+                                        }
+                                    }
+                                }
+                            }
+                            s.graph.clear();
+                            s.graph.read(graph);
+                            //  signma draws the graph
+                            //s.startForceAtlas2();
+                            s.refresh();
+                        }, 1000);
+                    }
+                }
+                ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+            </script>
+            <script>
+                var coll = document.getElementsByClassName("collapsible");
+                var i;
+                for (i = 0; i < coll.length; i++) {
+                    coll[i].addEventListener("click", function () {
+                        this.classList.toggle("active");
+                        var content = this.nextElementSibling;
+                        if (content.style.display === "block") {
+                            content.style.display = "none";
+                        } else {
+                            content.style.display = "block";
+                        }
+                    });
+                }
+            </script>
+        </div>
+        <!--Main screen display-->
+        <div class="main">
+            <div id="container" style="height: 100%; width: 100%">
+            </div>
+            <script>
+                // dijikstra's algorithm classes STARTS here
+                class Edge {
+                    constructor(d, c) {
+                        this.dest = d;
+                        this.cost = c;
+
+                    }
+                }
+                // class representing a vertex in the graph
+                class Vertex {
+                    constructor(name) {
+                        this.name = name;
+                        //this.subtract = false;
+                        this.adj = [];
+                        this.dist = 0;
+                        this.scratch = 0;
+                        this.paths = [];
+                        this.prev = null;
+                        this.reset();
+                    }
+                    // resets the values back to their defaults 
+                    reset() {
+                        this.scratch = 0;
+                        this.dist = Infinity;
+                        this.prev = null;
+
+                    }
+                    // boolean to determine if there is an edge 
+                    hasEdge() {
+                        if (this.adj.length == 0) {
+                            return false;
+                        } else {
+                            return true;
+                        }
+                    }
+                    // accessor method to return the distance 
+                    getDistance() {
+                        return this.dist;
+                    }
+                }
+
+                // represents the path with the destination and cost, and compares paths to contain the lowest cost
+                class Path {
+                    constructor(d, c) {
+                        this.dest = d;
+                        this.cost = c;
+                    }
+                    compareTo(otherPath) {
+                        otherCost = otherPath.cost;
+                        return otherCost < otherPath ? -1 : otherCost > otherPath ? 1 : 0;
+                    }
+                }
+
+                // class contains routing algorithms with the relevant methods to clear the vertexMap, calculate the shortest path and return to the user with the cost and the two routing algoriths we are using
+                // which is dijikstra and bellman ford
+                class routingAlgorithms {
+                    constructor() {
+                        this.vertexMap = {};
+                    }
+                    // resets the values in the vertexMap to the default
+                    clearAll() {
+                        for (var v of Object.values(this.vertexMap)) {
+                            v.reset();
+                        }
+                    }
+
+                    // the calculated shortest path is added to a path string which is then outputed to the UI to be viewed 
+                    printOutPath(dest) {
+                        var path = "";
+                        if (dest.paths.length != 0) {
+                            path += this.printOutPath(dest.paths[0])
+
+                        }
+                        path += "-->" + dest.name;
+                        return path;
+                    }
+
+                    // Bellman Ford's algorithm used to calculate the shortest and least cost path between a start node and destination when there are negative weights, an alternate algorithm we added
+                    bellmanFord(startNode) {
+                        var pq = [];
+                        if (!(startNode in this.vertexMap)) {
+                            console.log("Start vertex not found");
+                        }
+                        var start = this.vertexMap[startNode];
+                        this.clearAll();
+                        pq.push(new Path(start, 0));
+                        start.dist = 0;
+                        start.scratch++;
+                        var nodesSeen = 0;
+                        start.paths = [];
+                        var sizeOfVertexMap = Object.keys(this.vertexMap).length
+                        while (pq.length != 0 && nodesSeen < sizeOfVertexMap) {
+                            var v = pq.shift();
+                            if (v.scratch++ > 2 * sizeOfVertexMap) {
+                                console.log("Negative cycle detected");
+
+                            }
+                            var e = 0;
+                            for (e = 0; e < v.adj.length; e++) {
+                                var w = v.adj[e].dest;
+                                var cvw = v.adj[e].cost;
+                                if (w.dist > v.dist + cvw) {
+                                    w.dist = v.dist + cvw;
+                                    w.prev = v;
+
+                                }
+                                if (w.scratch++ % 2 == 0) {
+                                    pq.push(w);
+                                } else {
+                                    w.scratch--
+                                }
+                            }
+                        }
+                    }
+
+                    // Dijikstra's algorithm used to calculate the shortest and least cost path between a start node and destination
+                    dijikstraAlgorithm(startNode) {
+                        var pq = []
+                        if (!(startNode in this.vertexMap)) {
+                            console.log("Start vertex not found");
+                        }
+                        var start = this.vertexMap[startNode];
+                        this.clearAll();
+                        pq.push(new Path(start, 0));
+                        start.dist = 0;
+                        var nodesSeen = 0;
+                        start.paths = [];
+                        while (pq.length != 0 && nodesSeen < Object.keys(this.vertexMap).length) {
+                            var vrec = pq.shift();
+                            var v = vrec.dest;
+                            if (v.scratch != 0)
+                                continue;
+                            v.scratch = 1;
+                            nodesSeen++;
+                            var e = 0;
+                            for (e = 0; e < v.adj.length; e++) {
+                                var w = v.adj[e].dest;
+                                var cvw = v.adj[e].cost;
+                                if (cvw < 0)
+                                    console.log("Graph has negative edges");
+                                if (w.dist >= v.dist + cvw) {
+                                    if (w.dist > v.dist + cvw) {
+                                        w.dist = v.dist + cvw;
+                                        w.paths = [];
+                                    }
+                                    w.paths.push(v);
+                                    pq.push(new Path(w, w.dist));
+                                }
+                            }
+                        }
+                    }
+                    
+                    // adds an edge to the graph that has a source, destination and cost
+                    addEdge(sourceName, destName, cost) {
+                        var v = this.getVertex(sourceName);
+                        var w = this.getVertex(destName);
+                        var newEdge = new Edge(w, cost);
+                        v.adj.push(newEdge);
+                    }
+
+                    // adds a single node to the graph, used in our csv file because we first push the node ID's to the graph and the push the edges
+                    addEdgeSingle(sourceName) {
+                        var v = this.getVertex(sourceName);
+                    }
+
+                    // accessor method to retrieve a specific vertex from the vertex map, if the cvertex is not found it creates a new vertex 
+                    getVertex(vertexName) {
+                        if (vertexName in this.vertexMap) {
+                            return this.vertexMap[vertexName];
+                        }
+                        var v = new Vertex(vertexName);
+                        this.vertexMap[vertexName] = v;
+                        return v;
+                    }
+                }
+
+                // creates a new instance of the routing algorithm class which will use with our graph
+                var g = new routingAlgorithms();
+                // create and initialise an instance of sigma
+                var s = new sigma(
+                        {
+                            renderer: {
+                                container: document.getElementById('container'),
+                                type: 'canvas'
+                            },
+                            settings: {
+                                minEdgeSize: 0.1,
+                                maxEdgeSize: 2,
+                                midNodeSize: 1,
+                                maxNodeSize: 20,
+                            }
+                        }
+                );
+
+                // the plugin below provides us with capability to drag the nodes on the graph while the animation is paused. Once the animation is resumed it places the nodes in its original place
+                var dragListener = sigma.plugins.dragNodes(s, s.renderers[0]);
+                dragListener.bind('startdrag', function (event) {
+
+                });
+                dragListener.bind('drag', function (event) {
+
+                });
+                dragListener.bind('drop', function (event) {
+
+                });
+                dragListener.bind('dragend', function (event) {
+
+                });
+
+                //creates graph object with nodes and edges
+                var graph = {
+                    nodes: [
+                    ],
+                    edges: [
+                    ]
+                }
+                // this event ultinately functions as our main method for the application. 
+                // when a file is selected it populates all the drop down boxes for the user to select from (done to minimise user error)
+                // it splits the CSV file input that the user selects to read in the nodes and edges with costs to sigma which graphs the function 
+                // it graphs the function with the different tiers and edges and types of links in different colors
+                // when clicking on the animate button it changes the layout into a logical layout with easy viewing of different sub networks for the user
+
+                var openFile = function (event) {
+                    nodeIds = [];
+                    selectStart.innerText = null;
+                    edgeCost.innerText = null;
+                    edgeDelay.innerText = null;
+                    selectEnd.innerText = null;
+                    existingNode.innerText = null;
+                    nodeToDelete.innerText = null;
+                    selectRoutingAlgorithm.innerText = null;
+                    packetSize.innerText = null;
+                    performancecount=0;
+                    window.localStorage.clear();
+                    localStorage.clear();
+                    graph.nodes = [];
+                    graph.edges = [];
+                    for (choice in algorithmChoice) {
+                        selectRoutingAlgorithm.add(new Option(algorithmChoice[choice]));
+                    }
+                    s.graph.clear();
+                    var input = event.target;
+                    var reader = new FileReader();
+                    reader.onload = function () {
+                        var text = reader.result;
+                        var lines = text.split("\n");
+                        var counter = 1;
+                        var line = lines[counter];
+                        line = line.trim();
+                        var radius = 10;
+                        // reads in the nodeIDs and the respective tiers into sigma with the respective colours for each tier into sigma
+                        while (line != "Source,Destination,Type,Cost,Delay") {
+                            splitLines = line.split(",");
+                            //logical block to add Node data from csv to database
+                            //############################################################################################################
+                            if (typeof (Storage) !== "undefined") {
+                                nodecounter++;
+                                var m = "%n" + splitLines[0].trim();
+                                var n = splitLines[1].trim() + "," + splitLines[2].trim();
+                                localStorage.setItem(m, n);
+                            } else {
+                                document.getElementById("result").innerHTML = "Sorry, your browser does not support Web Storage...";
+                            }
+                            //##########################################################################################################
+                            if (splitLines[1] === "T1") {
+                                var a = Math.random() * 2 * 3.142;
+                                // adds to the graph here
+                                graph.nodes.push({id: splitLines[0], size: 9, color: '#70c405', label: line, x: Math.cos(a) * radius, y: Math.sin(a) * radius});
+                                g.addEdgeSingle(splitLines[0], true);
+                                nodeIds.push(splitLines[0]);
+                                counter++;
+                                line = lines[counter];
+                                line = line.trim();
+
+                            } else if (splitLines[1] === "T2") {
+                                var a = Math.random() * 2 * 3.142;
+                                // adds to the graph here
+                                graph.nodes.push({id: splitLines[0], size: 6, color: '#fcd134', label: line, x: Math.cos(a) * radius, y: Math.sin(a) * radius});
+                                g.addEdgeSingle(splitLines[0]);
+                                nodeIds.push(splitLines[0]);
+                                counter++;
+                                line = lines[counter];
+                                line = line.trim();
+
+                            } else if (splitLines[1] === "T3") {
+                                var a = Math.random() * 2 * 3.142;
+                                // adds to the graph here
+                                graph.nodes.push({id: splitLines[0], size: 3, color: '#ff1744', label: line, x: Math.cos(a) * radius, y: Math.sin(a) * radius});
+                                g.addEdgeSingle(splitLines[0]);
+                                nodeIds.push(splitLines[0]);
+                                counter++;
+                                line = lines[counter];
+                                line = line.trim();
+
+                            } else if (splitLines[1] === "IX") {
+                                var a = Math.random() * 2 * 3.142;
+                                // adds to the graph here
+                                graph.nodes.push({id: splitLines[0], size: 3, color: '#008cc2', label: line, x: Math.cos(a) * radius, y: Math.sin(a) * radius});
+                                g.addEdgeSingle(splitLines[0], true);
+                                nodeIds.push(splitLines[0]);
+                                counter++;
+                                line = lines[counter];
+                                line = line.trim();
+                            }
+                        }
+                        counter++;
+                        line = lines[counter];
+                        line = line.trim();
+                        // reads in the rest of the file after the "Source, destination ,cost, type etc to the sigma graph, i.e. pushes the edges to sigma and to the database"
+                        while (counter < lines.length) {
+                            counter++;
+                            splitLines = line.split(",");
+                            // logical block to add edge data from .csv to datbase
+                            //##################################################################################################################
+                            if (typeof (Storage) !== "undefined") {
+                                edgecounter++;
+                                var costnow = parseInt(splitLines[3].trim())+1;
+                                var k = "%edge" + edgecounter;
+                                if (splitLines[0]) {
+                                    var d = splitLines[0].trim() + "," + splitLines[1].trim() + "," + splitLines[2].trim() + "," + costnow + "," + splitLines[4].trim();
+                                    localStorage.setItem(k, d);
+                                }
+                            } else {
+                                document.getElementById("result").innerHTML = "Sorry, your browser does not support Web Storage...";
+                            }
+                            //###################################################################################################################
+                            if (splitLines[2] === "P") {
+                                graph.edges.push({id: "Edge" + counter, source: splitLines[0].trim(), target: splitLines[1].trim(), label: splitLines[3].trim(), color: '#282c34', size: 0.5})
+                                var cost = parseInt(splitLines[3]);
+                                g.addEdge(splitLines[0].trim(), splitLines[1].trim(), cost+1);
+                                line = lines[counter];
+
+                            } else if (splitLines[2] === "PC") {
+                                graph.edges.push({id: "Edge" + counter, source: splitLines[0].trim(), target: splitLines[1].trim(), label: splitLines[3].trim(), color: '#46ff33', size: 0.5})
+                                var cost = parseInt(splitLines[3]);
+                                g.addEdge(splitLines[0].trim(), splitLines[1].trim(), cost+1);
+                                line = lines[counter];
+
+                            } else if (splitLines[2] === "CP") {
+                                graph.edges.push({id: "Edge" + counter, source: splitLines[0].trim(), target: splitLines[1].trim(), label: splitLines[3].trim(), color: '#46ff33', size: 0.5})
+                                var cost = parseInt(splitLines[3]);
+                                g.addEdge(splitLines[0].trim(), splitLines[1].trim(), cost+1);
+                                line = lines[counter];
+                            } else if (splitLines[2] == "IX") {
+
+                                graph.edges.push({id: "Edge" + counter, source: splitLines[0].trim(), target: splitLines[1].trim(), label: splitLines[3].trim(), color: '#33fcff', size: 0.5})
+                                var cost = parseInt(splitLines[3]);
+                                g.addEdge(splitLines[0].trim(), splitLines[1].trim(), cost+1);
+                                line = lines[counter];
+                            }
+                        }
+
+                        // populates the node start node, end node, existing node to connect and the node to delete for the user to selet
+                        for (var i = 0; i < nodeIds.length; i++) {
+                            selectStart.add(new Option(nodeIds[i]));
+                            selectEnd.add(new Option(nodeIds[i]));
+                            existingNode.add(new Option(nodeIds[i]));
+                            nodeToDelete.add(new Option(nodeIds[i]));
+                        }
+                        // populates the tiers for the user to select between Tier 1, Tier 2, Tier 3
+                        for (tier in nodeTiers) {
+                            selectTier.add(new Option(nodeTiers[tier]));
+                        }
+                        
+                        // populates the packet sizes between 1-1000 for user to select
+                        for (var packets = 1; packets<=1000;packets++){
+                            packetSize.add(new Option(packets));
+                        }
+                        // populates the edge cost and delay between 0-10 for user to select
+                        for (var cost = 0; cost<=10;cost++){
+                            edgeCost.add(new Option(cost));
+                            edgeDelay.add(new Option(cost));
+                        }
+                        //load the graph into sigma
+                        s.graph.read(graph);
+                        // signma draws the graph
+                        s.refresh();
+                    };
+                    reader.readAsText(input.files[0]);
+                    // starts the force atlas algorithm when clicking on the animate button, when clicked again it pauses/resumes the layout of the grpah
+                    var force = false;
+                    document.getElementById('layout').onclick = function () {
+                        if (!force)
+                            s.startForceAtlas2({slowDown: 10});
+                        else
+                            s.stopForceAtlas2();
+                        force = !force;
+                    };
+                };
+            </script>
+        </div>
+    </body>
+</html>
