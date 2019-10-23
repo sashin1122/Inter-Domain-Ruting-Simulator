@@ -1,3 +1,8 @@
+
+![Test Image 4](https://github.com/tograh/testrepository/3DTest.png)
+
+
+
 Overview
 
 This program was designed as a simple ruting simulator that enables users to build a network configuration (iether through the user interface or through a .csv file with speciefied formats, see network.csv for example). After a network is configured the user can then perform routing simulations from one node to another. The program will calculate shortest paths using dijikstras algorythm and will produce calculated performance data aswell as light up the path when requested. Use the "Animate" button to stabalize or fix the anamation at any point in the programs use. The program has a localy built database for storing in app data so performance data and network topology can be recovered if app is accidentally closed. 
