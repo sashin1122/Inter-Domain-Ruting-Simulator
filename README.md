@@ -3,6 +3,7 @@
 
 
 
+
 Overview
 
 This program was designed as a simple ruting simulator that enables users to build a network configuration (iether through the user interface or through a .csv file with speciefied formats, see network.csv for example). After a network is configured the user can then perform routing simulations from one node to another. The program will calculate shortest paths using dijikstras algorythm and will produce calculated performance data aswell as light up the path when requested. Use the "Animate" button to stabalize or fix the anamation at any point in the programs use. The program has a localy built database for storing in app data so performance data and network topology can be recovered if app is accidentally closed. 
@@ -32,3 +33,6 @@ The performance data will be displayed below the heading “performance data”.
 Additionally the network topology may also be downloaded by selecting the “Download Network Topology Data” button.
 If connection is lost or the browser is refreshed, the previous sessions’ network can be reloaded and the previous sessions’ performance data and network topology data will be available for download by selecting the “Download Performance Data” button or the “Download Network Topology Data” button.
 Additional Information is provided at the bottom of the network configuration bar for the user’s convenience.
+
+
+![Test Image 4](https://github.com/sashin1122/Inter-Domain-Ruting-Simulator/blob/master/networksim2.png)
